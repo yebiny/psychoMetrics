@@ -29,6 +29,8 @@ class eda():
         if show=='y':
             print(data[:2])
         
+        data = np.array(data)
+
         return feature, data
 
     def convert_object2int(self, feature, data):
@@ -40,26 +42,34 @@ class eda():
 
         return np.array(new_data)
     
-    def plot_hist(self, idx):
+    def plot_hist(self, idx, vote=0):
         feature, data = self.get_info(idx, show='n')
+        if np.max(data)>10:
+            plt.hist(data, color='g', alpha=0.6, bins=(1000))
+            plt.yscale('log')
+        else: 
+            data = np.int64(data)
         
         plt.title(feature)
-        if np.max(data)<10 and data.dtype==int:
-            plt.hist(data, range=(0, np.max(data)+1), bins=np.max(data)+1, color='g', alpha=0.6, edgecolor='w',linewidth=1.3)
-            plt.xticks([i for i in range(np.max(data)+1)])
-            plt.yticks([])
-            for i in range(0, np.max(data)+1):
-                n = len(data[data==i])
-                plt.text(x = i+0.1 , y = n+0.1, s = n, size = 9)
+        if vote==1:
+            data1=data[self.dataset['voted']==1]
+            data2=data[self.dataset['voted']==2]
+            plt.hist([data1,data2], range=(0, np.max(data1)+1), bins=np.max(data1)+1,
+                    color=['dodgerblue','orangered'], alpha=0.8)
         else:
-            print('test')
-            plt.hist(data, color='g', alpha=0.6)
+             if np.max(data)<10:
+                 plt.hist(data, range=(0, np.max(data)+1), bins=np.max(data)+1, color='g', alpha=0.6, edgecolor='w',linewidth=1.3)
+                 plt.xticks([i for i in range(np.max(data)+1)])
+                 plt.yticks([])
+                 for i in range(0, np.max(data)+1):
+                     n = len(data[data==i])
+                     plt.text(x = i+0.1 , y = n+0.1, s = n, size = 9)
 
 
-    def plot_multi_hist(self, idx_list, r=5):
-        fig = plt.figure(figsize=(r*4,15))
+    def plot_multi_hist(self, idx_list, vote=0, r=5):
+        fig = plt.figure(figsize=(r*4,20))
         for idx in range(len(idx_list)):
-            plt.subplot(3,r,idx+1)
-            self.plot_hist(idx_list[idx])
+            plt.subplot(4,r,idx+1)
+            self.plot_hist(idx_list[idx], vote=vote)
         plt.show()
 
