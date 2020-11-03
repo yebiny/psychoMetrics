@@ -1,3 +1,5 @@
+import os, sys
+import argparse
 import numpy as np
 import pandas as pd 
 
@@ -31,12 +33,12 @@ def point_one_hot(data, point_label):
     processed_data=[]
     for var in data:
         if var==point_label:
-            y=[1,0]
+            y=[1]
         elif var!=point_label:
             if var==0:
-                y=[0,0]
+                y=[0.5]
             else:
-                y=[0,1]
+                y=[0]
         processed_data.append(y)
     return np.array(processed_data)
 
@@ -79,33 +81,40 @@ def make_yset(dataset):
     return yset
 
 def main():
-    data_path = '../0-Data/org/train.csv'
-    dataset = pd.read_csv(data_path)
-    features = dataset.columns
-    print(features)
-
+    
+    opt = argparse.ArgumentParser()
+    opt.add_argument(dest='csv_file', type=str)
+    args=opt.parse_args()
 
     features_used = [
-    
     'QbA', 'QjA', 'QkA', 'QmA', 'QnA','QoA', 'QpA','QqA', 'QsA', 'QtA',
     'tp03', 'tp04','tp06', 'tp07', 'tp08', 'tp09','education',
     ['age_group', '10s'],
     ['married', 'Never married'],
+    ['urban', 'Rural'],
+    ['race', 'White'],
     
     ]
     print('# of features that used: %i '%len(features_used), features_used)
-
-    x_dset = make_xset(dataset, features_used)
-    y_dset = make_yset(dataset)
+   
+    dataset = pd.read_csv(args.csv_file)
     
-    print('\n * Final x shape: ', x_dset.shape)
-    print('\n * Final y shape: ', y_dset.shape)
-
-    np.save('x_dset', x_dset)
-    np.save('y_dset', y_dset)
-
-
+    if 'train' in args.csv_file:
+        x_data = make_xset(dataset, features_used)
+        np.save('x_data', x_data)
+        y_data = make_yset(dataset)
+        np.save('y_data', y_data)
+        print('\n * Final x shape: ', x_data.shape)
+        print('\n * Final y shape: ', y_data.shape)
     
+    elif 'test' in args.csv_file:
+        x_data = make_xset(dataset, features_used)
+        np.save('x_test', x_data)
+        print('\n * Final x shape: ', x_data.shape)
+
+    else: print('Wrong csv file. check csv file.')
+
+
 if __name__ == '__main__':
     main()
 
